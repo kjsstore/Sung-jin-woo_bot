@@ -15,14 +15,6 @@ echo -e "${GREEN}   🚀 SUNG-JIN-WOO BOT INSTALLER${NC}"
 echo -e "${BLUE}==========================================${NC}"
 echo ""
 
-# ==========================================
-# CEK USER
-# ==========================================
-if [ "$EUID" -eq 0 ]; then 
-    echo -e "${RED}❌ Jangan jalankan sebagai root!${NC}"
-    exit 1
-fi
-
 USERNAME=$(whoami)
 echo -e "${YELLOW}👤 User: $USERNAME${NC}"
 

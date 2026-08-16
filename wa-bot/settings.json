@@ -1,0 +1,16 @@
+{
+  "ownerNumber": ["6285943111681"],
+  "mode": "public",
+  "botName": "KJS BOT",
+  "PAYMENT": "ORKUT",
+  "DATA_QRIS_ORKUT": "ReadQRIS",
+  "antiCall": true,
+  "autoJoin": false,
+  "autoRead": {
+    "enabled": false,
+    "scope": "group",
+    "ignoreOwner": true,
+    "delayMs": [100, 700]
+  },
+  "autoReadSw": true
+}

@@ -1,37 +1,45 @@
 #!/bin/bash
+# ==========================================
+# 🚀 SUNG-JIN-WOO BOT - ROOT INSTALLER
+# ==========================================
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo -e "${GREEN}==========================================${NC}"
-echo -e "${GREEN}   🔧 SUNG-JIN-WOO BOT INSTALLER${NC}"
-echo -e "${GREEN}==========================================${NC}"
+clear
+echo -e "${BLUE}==========================================${NC}"
+echo -e "${GREEN}   🚀 SUNG-JIN-WOO BOT (ROOT MODE)${NC}"
+echo -e "${BLUE}==========================================${NC}"
+echo ""
 
-# CEK USER
-if [ "$EUID" -eq 0 ]; then 
-    echo -e "${RED}❌ Jangan jalankan sebagai root!${NC}"
-    exit 1
-fi
+echo -e "${YELLOW}📦 Update packages...${NC}"
+apt update && apt upgrade -y
 
-# 1. INSTALL NODEJS 20 LTS
+echo -e "${YELLOW}📦 Install dependencies...${NC}"
+apt install -y git curl wget build-essential ffmpeg imagemagick
+
 echo -e "${YELLOW}📦 Install Node.js 20 LTS...${NC}"
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs npm
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs npm
 
-# 2. INSTALL PM2
 echo -e "${YELLOW}📦 Install PM2...${NC}"
-sudo npm install -g pm2
+npm install -g pm2
+pm2 update
 
-# 3. CLONE REPO
 cd ~
-if [ ! -d "Sung-jin-woo_bot" ]; then
+if [ -d "Sung-jin-woo_bot" ]; then
+    echo -e "${YELLOW}📁 Folder sudah ada, update...${NC}"
+    cd Sung-jin-woo_bot
+    git pull
+else
+    echo -e "${YELLOW}📁 Clone repository...${NC}"
     git clone https://github.com/kjsstore/Sung-jin-woo_bot.git
+    cd Sung-jin-woo_bot
 fi
-cd Sung-jin-woo_bot
 
-# 4. BUAT CONFIG.JS
 echo -e "${YELLOW}⚙️ Membuat config.js...${NC}"
 cat > config.js << 'EOF'
 module.exports = {
@@ -42,48 +50,37 @@ module.exports = {
 };
 EOF
 
-# 5. BUAT FOLDER FUNCTION DI WABOT
-echo -e "${YELLOW}📁 Membuat folder function...${NC}"
+echo -e "${YELLOW}📁 Setup folder function...${NC}"
 mkdir -p wabot/function
 
-# 6. BUAT FILE PURCHASE FLOW (DUMMY)
-echo -e "${YELLOW}📝 Membuat purchaseFlow.js...${NC}"
 cat > wabot/function/purchaseFlow.js << 'EOF'
 exports.handleMessage = async (sock, m, context) => {
     return false;
 };
 EOF
 
-# 7. BUAT FILE TRIAL FLOW (DUMMY)
-echo -e "${YELLOW}📝 Membuat trialFlow.js...${NC}"
 cat > wabot/function/trialFlow.js << 'EOF'
 exports.handleMessage = async (sock, m) => {
     return false;
 };
 EOF
 
-# 8. BUAT FILE RENEW FLOW (DUMMY)
-echo -e "${YELLOW}📝 Membuat renewFlow.js...${NC}"
 cat > wabot/function/renewFlow.js << 'EOF'
 exports.handleMessage = async (sock, m, context) => {
     return false;
 };
 EOF
 
-# 9. INSTALL DEPENDENSI TELEGRAM
 echo -e "${YELLOW}🤖 Install Telegram Bot...${NC}"
 npm install --force
 
-# 10. INSTALL DEPENDENSI WA
 echo -e "${YELLOW}📱 Install WhatsApp Bot...${NC}"
 cd wabot
 npm install --force
 cd ..
 
-# 11. BUAT FOLDER SESSION
 mkdir -p wabot/sessions
 
-# 12. PM2 ECOSYSTEM
 echo -e "${YELLOW}⚙️ Setup PM2...${NC}"
 cat > ecosystem.config.js << 'EOF'
 module.exports = {
@@ -92,37 +89,50 @@ module.exports = {
       name: 'telegram-bot',
       cwd: '/root/Sung-jin-woo_bot',
       script: 'index.js',
+      watch: false,
       autorestart: true,
-      max_memory_restart: '500M'
+      max_memory_restart: '500M',
+      env: { NODE_ENV: 'production' }
     },
     {
       name: 'wabot',
       cwd: '/root/Sung-jin-woo_bot/wabot',
       script: 'index.js',
+      watch: false,
       autorestart: true,
-      max_memory_restart: '500M'
+      max_memory_restart: '500M',
+      env: { NODE_ENV: 'production' }
     }
   ]
 };
 EOF
 
-# 13. START
+echo -e "${YELLOW}🚀 Starting bot...${NC}"
 pm2 delete all 2>/dev/null
 pm2 start ecosystem.config.js
 pm2 save
 pm2 startup | tail -1 | bash
 
+echo ""
 echo -e "${GREEN}==========================================${NC}"
 echo -e "${GREEN}   ✅ INSTALLASI SELESAI!${NC}"
 echo -e "${GREEN}==========================================${NC}"
 echo ""
-echo -e "${YELLOW}📌 EDIT CONFIG:${NC}"
-echo -e "   nano ~/Sung-jin-woo_bot/config.js"
+echo -e "${BLUE}📁 Lokasi: ~/Sung-jin-woo_bot${NC}"
 echo ""
-echo -e "${YELLOW}📌 RESTART:${NC}"
-echo -e "   pm2 restart all"
+echo -e "${YELLOW}📌 LANGKAH SELANJUTNYA:${NC}"
 echo ""
-echo -e "${YELLOW}📌 CEK STATUS:${NC}"
-echo -e "   pm2 status"
-echo -e "   pm2 logs"
+echo -e "1️⃣  Edit Token:"
+echo -e "    ${BLUE}nano ~/Sung-jin-woo_bot/config.js${NC}"
+echo -e "    Ganti: ${YELLOW}YOUR_BOT_TOKEN_HERE${NC} dan ${YELLOW}YOUR_TELEGRAM_ID_HERE${NC}"
 echo ""
+echo -e "2️⃣  Restart: ${BLUE}pm2 restart all${NC}"
+echo ""
+echo -e "3️⃣  Cek status: ${BLUE}pm2 status${NC}"
+echo -e "    Logs: ${BLUE}pm2 logs --lines 30${NC}"
+echo ""
+echo -e "4️⃣  Pairing WA: ${BLUE}/pair 628xxxxxxxxxx${NC} di Telegram"
+echo ""
+echo -e "${GREEN}==========================================${NC}"
+echo -e "${GREEN}   🎉 SELAMAT!${NC}"
+echo -e "${GREEN}==========================================${NC}"
